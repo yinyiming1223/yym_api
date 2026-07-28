@@ -20,6 +20,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve base version
+        id: version
+        shell: bash
+        run: |
+          tag="$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)"
+          if [ -n "$tag" ]; then
+            version="${tag#v}"
+          else
+            version="$(cat backend/cmd/server/VERSION)"
+          fi
+          echo "value=$version" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -41,7 +55,9 @@ jobs:
             ghcr.io/yinyiming1223/yym_api:custom-ui
             ghcr.io/yinyiming1223/yym_api:sha-${{ github.sha }}
           build-args: |
-            VERSION=custom-${{ github.sha }}
+            VERSION=${{ steps.version.outputs.value }}
+            COMMIT=${{ github.sha }}
+            BUILD_TYPE=source
             GOPROXY=https://proxy.golang.org,direct
             GOSUMDB=sum.golang.org
           cache-from: type=gha
