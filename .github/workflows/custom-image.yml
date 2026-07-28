@@ -28,11 +28,11 @@ jobs:
         shell: bash
         run: |
           tag="$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)"
-          if [ -n "$tag" ]; then
-            version="${tag#v}"
-          else
-            version="$(cat backend/cmd/server/VERSION)"
+          if [ -z "$tag" ]; then
+            echo "::error::No reachable official version tag found"
+            exit 1
           fi
+          version="${tag#v}"
           echo "value=$version" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
