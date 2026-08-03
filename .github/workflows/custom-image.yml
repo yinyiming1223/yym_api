@@ -23,6 +23,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Fetch official version tags
+        shell: bash
+        run: |
+          git remote add official https://github.com/Wei-Shaw/sub2api.git
+          git fetch --force --tags official
+
       - name: Resolve base version
         id: version
         shell: bash
